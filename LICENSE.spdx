@@ -21,3 +21,38 @@ PackageLicenseConcluded: GPL-2.0-only
 FilesAnalyzed: false
 PackageCopyrightText: NOASSERTION
 PackageDownloadLocation: NOASSERTION
+
+PackageName: rtc-include
+SPDXID: SPDXRef-rtc-include
+PackageFileName: ./include
+PackageOriginator: Organization: Kernkonzept GmbH (info@kernkonzept.com)
+PackageLicenseDeclared: GPL-2.0-only WITH GCC-exception-2.0
+PackageLicenseConcluded: GPL-2.0-only WITH GCC-exception-2.0
+FilesAnalyzed: false
+PackageCopyrightText: NOASSERTION
+PackageDownloadLocation: NOASSERTION
+
+PackageName: rtc-libc-be
+SPDXID: SPDXRef-rtc-libc-be
+PackageFileName: ./lib/libc_backend
+PackageOriginator: Organization: Kernkonzept GmbH (info@kernkonzept.com)
+PackageLicenseDeclared: GPL-2.0-only WITH GCC-exception-2.0
+PackageLicenseConcluded: GPL-2.0-only WITH GCC-exception-2.0
+FilesAnalyzed: false
+PackageCopyrightText: NOASSERTION
+PackageDownloadLocation: NOASSERTION
+
+PackageName: rtc-lib-client
+SPDXID: SPDXRef-rtc-lib-client
+PackageFileName: ./lib/client
+PackageOriginator: Organization: Kernkonzept GmbH (info@kernkonzept.com)
+PackageLicenseDeclared: GPL-2.0-only WITH GCC-exception-2.0
+PackageLicenseConcluded: GPL-2.0-only WITH GCC-exception-2.0
+FilesAnalyzed: false
+PackageCopyrightText: NOASSERTION
+PackageDownloadLocation: NOASSERTION
+
+## Relationships
+Relationship: SPDXRef-rtc CONTAINS SPDXRef-rtc-include
+Relationship: SPDXRef-rtc CONTAINS SPDXRef-rtc-libc-be
+Relationship: SPDXRef-rtc CONTAINS SPDXRef-rtc-lib-client
