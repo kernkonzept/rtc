@@ -21,7 +21,7 @@
 #include <l4/sys/l4int.h>
 
 
-EXTERN_C_BEGIN
+__BEGIN_DECLS
 
 L4_CV int
 l4rtc_get_offset_to_realtime(l4_cap_idx_t server, l4_uint64_t *nanoseconds);
@@ -31,7 +31,7 @@ l4rtc_set_offset_to_realtime(l4_cap_idx_t server, l4_uint64_t nanoseconds);
 
 L4_CV l4_uint64_t l4rtc_get_timer(void);
 
-EXTERN_C_END
+__END_DECLS
 
 #endif
 
