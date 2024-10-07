@@ -33,8 +33,13 @@ struct Pl031_rtc : Rtc
 
     L4vbus::Device dev;
     l4vbus_device_t devinfo;
+    int found_dev = 0;
 
-    if (vbus->root().device_by_hid(&dev, "arm,pl031", L4VBUS_MAX_DEPTH, &devinfo) < 0)
+    while (vbus->root().next_device(&dev, L4VBUS_MAX_DEPTH, &devinfo) == 0)
+      if ((found_dev = dev.is_compatible("arm,pl031")) == 1)
+        break;
+
+    if (found_dev <= 0)
       return false;
 
     for (unsigned i = 0; i < devinfo.num_resources; ++i)
