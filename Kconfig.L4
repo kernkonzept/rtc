@@ -1,0 +1,7 @@
+menu "RTC"
+
+config RTC_DS3231
+        bool "DS3231"
+        default n
+
+endmenu
