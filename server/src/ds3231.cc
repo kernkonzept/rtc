@@ -99,6 +99,70 @@ private:
       + 100;
   }
 
+  // binary to binary coded decimal
+  static l4_uint8_t bin2bcd(int value)
+  {
+    l4_uint8_t res = (value % 10) + 0x10 * ((value / 10) % 10);
+    return res;
+  }
+
+  // set the seconds value in data
+  static void set_seconds(int sec, raw_t data)
+  {
+    data[Reg_addr::Seconds] = bin2bcd(sec);
+  }
+
+  // set the minutes value in data
+  static void set_minutes(int min, raw_t data)
+  {
+    data[Reg_addr::Minutes] = bin2bcd(min);
+  }
+
+  // set the hours value in data
+  static void set_hours(int hours, raw_t data)
+  {
+    // this sets the 24h format.
+    l4_uint8_t val = hours % 10;
+    if (hours >= 10 && hours <= 19)
+      val |= 0x10;
+    else if (hours >= 20)
+      val |= 0x20;
+    data[Reg_addr::Hours] = val;
+  }
+
+  // set the week day value in data
+  static void set_wday(int wday, raw_t data)
+  {
+    data[Reg_addr::Wday] = wday;
+  }
+
+  // set the month day value in data
+  static void set_mday(int mday, raw_t data)
+  {
+    data[Reg_addr::Mday] = bin2bcd(mday);
+  }
+
+  // set the month value in data
+  // the value passed here is in range 0 .. 11
+  static void set_month(int month, raw_t data)
+  {
+    data[Reg_addr::Month_and_century] &= 0xc0;
+    data[Reg_addr::Month_and_century] |= bin2bcd(month + 1);
+  }
+
+  // set the year value in data
+  // due to internal encoding this needs to touch two elements of data
+  static void set_year(int year, raw_t data)
+  {
+    // we expect the year as stored in struct tm, i.e., relative to 1900
+    year = year - 100;
+    data[Reg_addr::Year] = bin2bcd(year % 100);
+    if (year > 100)
+      data[Reg_addr::Month_and_century] |= 0x80;
+    else
+      data[Reg_addr::Month_and_century] &= 0x7f;
+  }
+
 public:
   bool probe()
   {
@@ -120,6 +184,31 @@ public:
 
   int set_time([[maybe_unused]] l4_uint64_t offset_nsec)
   {
+    time_t const offset_sec = offset_nsec / 1'000'000'000;
+    struct tm time;
+    gmtime_r(&offset_sec, &time);
+    raw_t data = {0, 0, 0, 0, 0, 0, 0};
+    set_year(time.tm_year, data);
+    set_month(time.tm_mon, data);
+    set_mday(time.tm_mday, data);
+    set_wday(time.tm_wday, data);
+    set_hours(time.tm_hour, data);
+    set_minutes(time.tm_min, data);
+    set_seconds(time.tm_sec, data);
+    if (_ds3231.is_valid())
+      {
+        l4_uint8_t send_data[1 + sizeof(data)];
+        send_data[0] = 0; // reg-addr to write to
+        memcpy(&send_data[1], data, sizeof(data));
+        L4::Ipc::Array<l4_uint8_t const> send_buffer{sizeof(send_data),
+                                                     send_data};
+        _ds3231->write(send_buffer);
+      }
+    else
+      {
+        printf("Direct device access is needed for now\n");
+        return -L4_ENODEV;
+      }
     return 0;
   }
 
