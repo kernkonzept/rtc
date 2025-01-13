@@ -28,8 +28,9 @@ struct Pl031_rtc : Rtc
 {
   bool probe()
   {
-    auto vbus = L4Re::chkcap(L4Re::Env::env()->get_cap<L4vbus::Vbus>("vbus"),
-                             "Get 'vbus' capability.", -L4_ENOENT);
+    auto vbus = L4Re::Env::env()->get_cap<L4vbus::Vbus>("vbus");
+    if (!vbus.is_valid())
+      return false;
 
     L4vbus::Device dev;
     l4vbus_device_t devinfo;
