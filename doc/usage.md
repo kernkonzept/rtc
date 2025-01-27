@@ -27,3 +27,8 @@
    The vbus used to access hardware for port-based clock on X86 and pl031 on arm.
 
    The vbus is also needed for receiving the inhibitor signal from IO.
+
+ * 'ds3231' (optional)
+
+   The capability that provides access to an I2C DS3231 device. The capability
+   needs to be created with type 1 (i2c-device).
