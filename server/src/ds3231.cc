@@ -170,7 +170,7 @@ public:
     if (_ds3231.is_valid())
       {
         l4_uint64_t time;
-        if (l4_error_code_t err = get_time(&time); err != L4_EOK)
+        if (int err = get_time(&time); err != L4_EOK)
           {
             printf("get_time() in probe returned %d\n", err);
             return false;
@@ -206,7 +206,7 @@ public:
         memcpy(&send_data[1], data, sizeof(data));
         L4::Ipc::Array<l4_uint8_t const> send_buffer{sizeof(send_data),
                                                      send_data};
-        if (l4_error_code_t err = _ds3231->write(send_buffer); err != L4_EOK)
+        if (int err = _ds3231->write(send_buffer); err != L4_EOK)
           {
             printf("write time data returned error code %d", err);
             return err;
@@ -232,14 +232,14 @@ public:
       {
         l4_uint8_t addr = 0;
         L4::Ipc::Array<l4_uint8_t const> send_buffer{sizeof(addr), &addr};
-        if (l4_error_code_t err = _ds3231->write(send_buffer); err != L4_EOK)
+        if (int err = _ds3231->write(send_buffer); err != L4_EOK)
           {
             printf("writing register address for read returned error code %d",
                    err);
             return err;
           }
         L4::Ipc::Array<l4_uint8_t> buffer{Size, data};
-        if (l4_error_code_t err = _ds3231->read(buffer); err != L4_EOK)
+        if (int err = _ds3231->read(buffer); err != L4_EOK)
           {
             printf("reading time data returned error code %d", err);
             return err;
