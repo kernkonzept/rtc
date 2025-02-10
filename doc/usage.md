@@ -23,4 +23,4 @@
 
    The vbus used to access hardware for port-based clock on X86 and pl031 on arm.
 
-   The vbus is also needed for receiving the inhibition signal.
+   The vbus is also needed for receiving the inhibitor signal from IO.
