@@ -170,7 +170,11 @@ public:
     if (_ds3231.is_valid())
       {
         l4_uint64_t time;
-        L4Re::chksys(get_time(&time));
+        if (l4_error_code_t err = get_time(&time); err != L4_EOK)
+          {
+            printf("get_time() in probe returned %d\n", err);
+            return false;
+          }
         time_t secs = time / 1'000'000'000;
         printf("Found DS3231 RTC. Current time: %s\n",
                ctime(&secs));
@@ -202,7 +206,11 @@ public:
         memcpy(&send_data[1], data, sizeof(data));
         L4::Ipc::Array<l4_uint8_t const> send_buffer{sizeof(send_data),
                                                      send_data};
-        _ds3231->write(send_buffer);
+        if (l4_error_code_t err = _ds3231->write(send_buffer); err != L4_EOK)
+          {
+            printf("write time data returned error code %d", err);
+            return err;
+          }
       }
     else
       {
@@ -224,9 +232,18 @@ public:
       {
         l4_uint8_t addr = 0;
         L4::Ipc::Array<l4_uint8_t const> send_buffer{sizeof(addr), &addr};
-        _ds3231->write(send_buffer);
+        if (l4_error_code_t err = _ds3231->write(send_buffer); err != L4_EOK)
+          {
+            printf("writing register address for read returned error code %d",
+                   err);
+            return err;
+          }
         L4::Ipc::Array<l4_uint8_t> buffer{Size, data};
-        _ds3231->read(buffer);
+        if (l4_error_code_t err = _ds3231->read(buffer); err != L4_EOK)
+          {
+            printf("reading time data returned error code %d", err);
+            return err;
+          }
       }
     else
       {
