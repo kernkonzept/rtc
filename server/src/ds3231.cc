@@ -207,7 +207,7 @@ public:
                                                      send_data};
         if (int err = _ds3231->write(send_buffer); err != L4_EOK)
           {
-            printf("write time data returned error code %d", err);
+            printf("write time data returned error code %d\n", err);
             return err;
           }
       }
@@ -233,14 +233,14 @@ public:
         L4::Ipc::Array<l4_uint8_t const> send_buffer{sizeof(addr), &addr};
         if (int err = _ds3231->write(send_buffer); err != L4_EOK)
           {
-            printf("writing register address for read returned error code %d",
+            printf("writing register address for read returned error code %d\n",
                    err);
             return err;
           }
         L4::Ipc::Array<l4_uint8_t> buffer{Size, data};
         if (int err = _ds3231->read(buffer); err != L4_EOK)
           {
-            printf("reading time data returned error code %d", err);
+            printf("reading time data returned error code %d\n", err);
             return err;
           }
       }
