@@ -176,8 +176,7 @@ public:
             return false;
           }
         time_t secs = time / 1'000'000'000;
-        printf("Found DS3231 RTC. Current time: %s\n",
-               ctime(&secs));
+        printf("Found DS3231 RTC. Current time: %s", ctime(&secs));
         return true;
       }
 
