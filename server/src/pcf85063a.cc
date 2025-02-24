@@ -14,6 +14,7 @@
 // https://www.nxp.com/docs/en/data-sheet/PCF85063A.pdf
 
 #include "rtc.h"
+#include "bcd.h"
 
 #include <l4/re/env>
 #include <l4/util/util.h>
@@ -48,18 +49,6 @@ private:
   };
 
   using raw_t = l4_uint8_t[Reg_addr::Reg_size];
-
-  /* convert binary coded decimal to binary */
-  static l4_uint8_t bcd2bin(l4_uint8_t value)
-  {
-    return (value >> 4) * 10 + (value & 0x0f);
-  }
-
-  /* convert binary to binary coded decimal */
-  static l4_uint8_t bin2bcd(l4_uint8_t value)
-  {
-    return ((value / 10 % 10) << 4) | (value % 10);
-  }
 
   /* convert register file to struct tm */
   static void raw2tm(raw_t data, struct tm &tm)

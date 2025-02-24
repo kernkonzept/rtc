@@ -13,6 +13,7 @@
 // https://www.analog.com/media/en/technical-documentation/data-sheets/ds3231.pdf
 
 #include "rtc.h"
+#include "bcd.h"
 
 #include <l4/re/env>
 #include <l4/re/error_helper>
@@ -40,12 +41,6 @@ private:
         Year              = 0x06,
       };
   };
-
-  // binary coded decimal to binary
-  static int bcd2bin(l4_uint8_t value)
-  {
-    return (value & 0x0f) +  10 * ((value & 0xf0) >> 4);
-  }
 
   // seconds in range 0..59
   static int seconds(raw_t data)
@@ -97,13 +92,6 @@ private:
     return bcd2bin(data[Reg_addr::Year])
       + ((data[Reg_addr::Month_and_century] & 0x80) ? 100 : 0)
       + 100;
-  }
-
-  // binary to binary coded decimal
-  static l4_uint8_t bin2bcd(int value)
-  {
-    l4_uint8_t res = (value % 10) + 0x10 * ((value / 10) % 10);
-    return res;
   }
 
   // set the seconds value in data
