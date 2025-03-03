@@ -163,7 +163,8 @@ public:
             printf("get_time() in probe returned %d\n", err);
             return false;
           }
-        time_t secs = time / 1'000'000'000;
+        l4_uint64_t ns = time + l4_kip_clock_ns(l4re_kip());
+        time_t secs = ns / 1'000'000'000;
         char buf[26];
         ctime_r(&secs, buf);
         printf("Found DS3231 RTC. Current time: %s", buf);
@@ -175,11 +176,12 @@ public:
     return false;
   }
 
-  int set_time([[maybe_unused]] l4_uint64_t offset_nsec)
+  int set_time(l4_uint64_t offset_nsec)
   {
-    time_t const offset_sec = offset_nsec / 1'000'000'000;
+    l4_uint64_t const ns = offset_nsec + l4_kip_clock_ns(l4re_kip());
+    time_t const sec = ns / 1'000'000'000ull;
     struct tm time;
-    gmtime_r(&offset_sec, &time);
+    gmtime_r(&sec, &time);
     raw_t data = {0, 0, 0, 0, 0, 0, 0};
     set_year(time.tm_year, data);
     set_month(time.tm_mon, data);
@@ -252,8 +254,8 @@ public:
     time.tm_isdst = 0;
     time.tm_gmtoff = 0;
     time.tm_zone = nullptr;
-    l4_uint64_t offset_sec = timegm(&time);
-    *offset_nsec = offset_sec * 1'000'000'000ul;
+    l4_uint64_t ns = timegm(&time) * 1'000'000'000ull;
+    *offset_nsec = ns - l4_kip_clock_ns(l4re_kip());
     return 0;
   }
 
