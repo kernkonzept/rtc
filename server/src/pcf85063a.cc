@@ -172,6 +172,7 @@ public:
     l4_uint64_t nsecs;
     if (int err = get_time(&nsecs); err != L4_EOK)
       return false;
+    nsecs += l4_kip_clock_ns(l4re_kip());
 
     {
       time_t secs = nsecs / 1'000'000'000ull;
