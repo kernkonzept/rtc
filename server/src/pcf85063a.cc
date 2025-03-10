@@ -114,14 +114,10 @@ private:
     L4::Ipc::Array<l4_uint8_t const> send_buffer{sizeof(addr), &addr};
     L4::Ipc::Array<l4_uint8_t> buffer{sizeof(data), data};
 
-    if (int err = _pcf85063a->write(send_buffer); err != L4_EOK)
+    if (int err = _pcf85063a->write_read(send_buffer, buffer.length, buffer);
+        err != L4_EOK)
       {
-        printf("ERROR: writing register address for read returned %d\n", err);
-        return err;
-      }
-    if (int err = _pcf85063a->read(buffer); err != L4_EOK)
-      {
-        printf("ERROR: reading registers returned %d\n", err);
+        printf("ERROR: writing and reading register returned %d\n", err);
         return err;
       }
 
