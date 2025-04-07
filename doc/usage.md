@@ -17,7 +17,10 @@
 
  * 'rtc' (server)
 
-   The capability that can be used from the outside to read and write the time.
+   The capability with which clients talk to the service. Note that writing
+   to the RTC is only possible when having the rtc capability with write
+   rights, read-only clients must have the capability with read rights
+   only.
 
  * 'vbus'
 
