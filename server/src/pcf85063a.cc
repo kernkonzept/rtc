@@ -147,15 +147,6 @@ public:
     if (!_pcf85063a.is_valid())
       return false;
 
-    raw_t data;
-    if (int err = read_data(data); err != L4_EOK)
-      return false;
-
-    if (data[Reg_addr::Seconds] & 0x80) {
-      printf("Found PCF85063A RTC, but it experienced power-loss; time will be bogus until re-set.");
-      return true;
-    };
-
     l4_uint64_t nsecs;
     if (int err = get_time(&nsecs); err != L4_EOK)
       return false;
@@ -182,10 +173,7 @@ public:
       return err;
 
     if (data[Reg_addr::Seconds] & 0x80)
-      {
-        printf("WARNING: PCF85063A power loss detected, set_time() needed\n");
-        return -1;
-      }
+      printf("WARNING: PCF85063A power-loss detected, time is invalid\n");
 
     struct tm stime;
     raw2tm(data, stime);
