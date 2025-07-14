@@ -32,3 +32,8 @@
 
    The capability that provides access to an I2C DS3231 device. The capability
    needs to be created with type 1 (i2c-device).
+
+ * 'pcf85063a' (optional)
+
+   The capability that provides access to an I2C PCF85063A device. The
+   capability needs to be created with type 1 (i2c-device).
