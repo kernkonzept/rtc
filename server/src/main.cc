@@ -117,6 +117,23 @@ private:
   void add_client(L4::Cap<L4::Irq> irq)
   { _client_irqs.push_back(irq); }
 
+  void remove_client(L4::Cap<L4::Irq> irq)
+  {
+    auto task = L4Re::Env::env()->task();
+    for (auto it = _client_irqs.begin(); it != _client_irqs.end();)
+      {
+        l4_msgtag_t msg = task->cap_equal(*it, irq);
+        if (msg.label() == 1)
+          {
+            // unmap to remove our reference
+            task->unmap((*it).fpage(), L4_FP_ALL_SPACES);
+            it = _client_irqs.erase(it);
+          }
+        else
+          ++it;
+      }
+  }
+
 public:
   explicit
   Rtc_svr(Clock *clock) : _clock(clock)
@@ -164,9 +181,17 @@ public:
     return L4_EOK;
   }
 
-  long op_unbind(L4::Icu::Rights , unsigned, L4::Ipc::Snd_fpage)
+  long op_unbind(L4::Icu::Rights , unsigned, L4::Ipc::Snd_fpage irq)
   {
-    return 0; // hw we should implement this somehow
+    if (!irq.cap_received())
+      return -L4_EINVAL;
+
+    L4::Cap<L4::Irq> irqc = server_iface()->rcv_cap<L4::Irq>(0);
+    if (!irqc.is_valid())
+      return -L4_EINVAL;
+
+    remove_client(irqc);
+    return L4_EOK;
   }
 
   long op_info(L4::Icu::Rights, L4::Icu::_Info &info)
