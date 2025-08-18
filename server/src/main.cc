@@ -141,8 +141,18 @@ public:
 
   void notify_clients()
   {
-    for (auto i: _client_irqs)
-      i->trigger();
+    for (auto i = _client_irqs.begin(); i != _client_irqs.end();)
+      {
+        if (auto err = l4_ipc_error((*i)->trigger(), l4_utcb()))
+          if (err == L4_IPC_ENOT_EXISTENT)
+            {
+              // Robustness. If a client did not call unbind(), we will have
+              // a stale IRQ capability. Here we clean up our list.
+              i = _client_irqs.erase(i);
+              continue;
+            }
+        ++i;
+      }
   }
 
   void update_time() { notify_clients(); }
@@ -176,8 +186,27 @@ public:
     if (msg.label() == 0)
       return -L4_EINVAL; // no cap received, bail out
 
-    add_client(irqc);
-    server_iface()->realloc_rcv_cap(0);
+    // The received capability is implicitly reference counted in the kernel.
+    // If the client vanishes without calling unbind(), this can cause the
+    // kernel to not discard the IRQ object because the RTC server still holds
+    // a reference.
+
+    // Here we remap the capability as a "weak" --non-reference-counted--
+    // capability. We do that with a grant operation, which both maps the IRQ
+    // object to a new capability and unmaps the received capability. This
+    // ensures that the RTC server does not hold a reference to the IRQ kernel
+    // object.
+    L4::Cap<L4::Irq> cap = L4Re::Util::cap_alloc.alloc<L4::Irq>();
+    if (!cap)
+      return -L4_ENOMEM;
+
+    auto task = L4Re::Env::env()->task();
+    if (l4_error(task->map(task, irqc.fpage(L4_CAP_FPAGE_RWSD),
+                           l4_map_obj_control(cap.cap(), L4_MAP_ITEM_GRANT)
+                           | L4_FPAGE_C_OBJ_RIGHTS | L4_FPAGE_C_NO_REF_CNT)))
+      return -L4_EINVAL;
+
+    add_client(cap);
     return L4_EOK;
   }
 
