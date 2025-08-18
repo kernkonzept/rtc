@@ -220,6 +220,10 @@ public:
       return -L4_EINVAL;
 
     remove_client(irqc);
+
+    // We must unmap our cap to free our reference. Otherwise kernel objects
+    // that should be discarded, will not be discarded.
+    L4Re::Env::env()->task()->unmap(irqc.fpage(), L4_FP_ALL_SPACES);
     return L4_EOK;
   }
 
