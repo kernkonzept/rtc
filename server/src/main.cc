@@ -114,21 +114,17 @@ class Rtc_svr :
 {
 private:
   Clock *_clock;
-  void add_client(L4::Cap<L4::Irq> irq)
-  { _client_irqs.push_back(irq); }
+  void add_client(L4Re::Util::Unique_cap<L4::Irq> irq)
+  { _client_irqs.push_back(std::move(irq)); }
 
   void remove_client(L4::Cap<L4::Irq> irq)
   {
     auto task = L4Re::Env::env()->task();
     for (auto it = _client_irqs.begin(); it != _client_irqs.end();)
       {
-        l4_msgtag_t msg = task->cap_equal(*it, irq);
+        l4_msgtag_t msg = task->cap_equal(it->get(), irq);
         if (msg.label() == 1)
-          {
-            // unmap to remove our reference
-            task->unmap((*it).fpage(), L4_FP_ALL_SPACES);
-            it = _client_irqs.erase(it);
-          }
+          it = _client_irqs.erase(it);
         else
           ++it;
       }
@@ -196,7 +192,7 @@ public:
     // object to a new capability and unmaps the received capability. This
     // ensures that the RTC server does not hold a reference to the IRQ kernel
     // object.
-    L4::Cap<L4::Irq> cap = L4Re::Util::cap_alloc.alloc<L4::Irq>();
+    auto cap = L4Re::Util::make_unique_cap<L4::Irq>();
     if (!cap)
       return -L4_ENOMEM;
 
@@ -206,7 +202,7 @@ public:
                            | L4_FPAGE_C_OBJ_RIGHTS | L4_FPAGE_C_NO_REF_CNT)))
       return -L4_EINVAL;
 
-    add_client(cap);
+    add_client(std::move(cap));
     return L4_EOK;
   }
 
@@ -257,7 +253,7 @@ public:
   }
 
 private:
-  std::vector<L4::Cap<L4::Irq> > _client_irqs;
+  std::vector<L4Re::Util::Unique_cap<L4::Irq> > _client_irqs;
 };
 
 #if 0
