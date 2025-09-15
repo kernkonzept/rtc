@@ -12,7 +12,6 @@
  */
 #pragma once
 
-#include <sys/cdefs.h>
 #include <l4/sys/l4int.h>
 #include <l4/cxx/hlist>
 
