@@ -10,5 +10,6 @@ SRC_CC           = main.cc
 SRC_CC-$(CONFIG_RTC_DS3231) += ds3231.cc
 SRC_CC-$(CONFIG_RTC_PCF85063A) += pcf85063a.cc
 REQUIRES_LIBS    = libio cxx_libc_io cxx_io libstdc++
+DEFINES          = -D_DEFAULT_SOURCE
 
 include $(L4DIR)/mk/prog.mk
